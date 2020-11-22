@@ -1,0 +1,116 @@
+﻿@page "/"
+@using Gtt.Chess.Engine
+<table>
+    <tbody>
+        @foreach (var r in this.Game.CurrentBoard().Cells.GroupBy(x => x.YAxis).OrderByDescending(x => x.Key))
+        {
+            <tr>
+                @foreach (var c in r.OrderBy(x => x.XAxis))
+                {
+                    <td @onclick="() => SelectCell(c)" style="border: 1px solid #333; width: 90px; height: 90px; background-color: @CellColor(c.CellName, c.CellColor); text-align: center;">
+                        @{ var img = ImageUrl(c); }
+                        @if (img.Item1)
+                        {
+                            <img src="@img.Item2" alt="" style="width: 60px; background-color: @PieceBackground(c);" />
+                        }
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code{
+
+    protected Game Game { get; set; }
+    protected CellStatus FirstCellSelected { get; set; }
+    protected CellStatus SecondCellSelected { get; set; }
+    protected string[] PossibleMoves { get; set; } = new string[0];
+
+    protected override Task OnInitializedAsync()
+    {
+        Game = new Game(GameStyle.Traditional);
+        return base.OnInitializedAsync();
+    }
+
+    protected Task SelectCell(CellStatus cell)
+    {
+        if (FirstCellSelected == null)
+        {
+            if (!string.IsNullOrWhiteSpace(cell.PieceColor) && Game.CurrentBoard().Turn != cell.PieceColor)
+            {
+                return Task.CompletedTask;
+            }
+
+            FirstCellSelected = cell;
+            PossibleMoves = Game.GetPossibleMoves(cell.CellName);
+        }
+        else if (FirstCellSelected == cell)
+        {
+            FirstCellSelected = null;
+            PossibleMoves = new string[0];
+        }
+        else if (FirstCellSelected != null && cell.PieceColor == FirstCellSelected.PieceColor)
+        {
+            FirstCellSelected = cell;
+            PossibleMoves = Game.GetPossibleMoves(cell.CellName);
+        }
+        else
+        {
+            SecondCellSelected = cell;
+            Game.Move(FirstCellSelected.CellName, SecondCellSelected.CellName);
+            FirstCellSelected = null;
+            SecondCellSelected = null;
+            PossibleMoves = new string[0];
+        }
+
+        return Task.CompletedTask;
+    }
+
+    protected string CellColor(string name, string color)
+    {
+        if (PossibleMoves.Contains(name))
+        {
+            return "#fff7dc";
+        }
+
+        if (FirstCellSelected?.CellName == name)
+        {
+            return "yellow";
+        }
+
+        if (color.Equals("White", StringComparison.InvariantCultureIgnoreCase))
+        {
+            return "#eee";
+        }
+        else
+        {
+            return "#666";
+        }
+    }
+
+    protected string PieceBackground(CellStatus c)
+    {
+        if (!string.IsNullOrWhiteSpace(c.PieceColor))
+        {
+            if (FirstCellSelected == null && c.PieceColor == Game.CurrentBoard().Turn)
+            {
+                return "#fff7dc";
+            }
+        }
+        return "transparent";
+    }
+
+    protected Tuple<bool, string> ImageUrl(CellStatus cell)
+    {
+        if (string.IsNullOrWhiteSpace(cell.PieceName))
+        {
+            return Tuple.Create(false, "");
+        }
+
+        string color = cell.PieceColor.Equals("white", StringComparison.CurrentCultureIgnoreCase) ? "w" : "b";
+
+        return Tuple.Create(true, $@"\images\pieces\{color}_{cell.PieceName.ToLowerInvariant()}_2x_ns.png");
+    }
+
+}
