@@ -11,13 +11,37 @@ namespace Gtt.Chess.Engine
     {
         private static int MaxX = 8;
         private static int MaxY = 8;
+        private readonly List<string> _history = new List<string>();
+        public bool ReplayMode { get; set; }
 
         public Board()
         {
             Cells = CreateCells();
             CurrentTurn = Color.White;
+        }
 
+        internal void ReplayHistory(string[] history, string nextFrom, string nextTo)
+        {
+            if (_history.Count > 0)
+                throw new Exception("Cannot replace history once a game is already started");
 
+            ReplayMode = true;
+            foreach (var h in history)
+            {
+                if (h.Length == 4)
+                {
+                    string from = h.Substring(0, 2);
+                    string to = h.Substring(2, 2);
+                    Move(from, to);
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(nextTo) && !string.IsNullOrWhiteSpace(nextFrom))
+            {
+                Move(nextFrom, nextTo);
+            }
+
+            ReplayMode = false;
         }
 
         internal PieceMoveResult[] Move(string from, string to)
@@ -43,6 +67,7 @@ namespace Gtt.Chess.Engine
             var r = cell.CurrentPiece.MoveTo(target);
             if (r.Any())
             {
+                _history.Add($"{from}{to}");
                 CurrentTurn = CurrentTurn == Color.White ? Color.Black : Color.White;
             }
 
@@ -291,11 +316,12 @@ namespace Gtt.Chess.Engine
 
         public Color[] WhatColorIsInCheck()
         {
-            return new Color[0];
-            //    var kings = FindPiecesByType<King>();
-            //    var threatened = kings.Where(x => x.ThreatenedBy().Any()).Select(x => x.Color).ToArray();
-            //    return threatened;
+            var kings = FindPiecesByType<King>().ToList();
+            var threatened = kings.Where(x => x.ThreatenedBy().Any()).Select(x => x.Color).ToArray();
+            return threatened;
         }
+
+        public string[] History => _history.ToArray();
 
         public string PrintBoard()
         {

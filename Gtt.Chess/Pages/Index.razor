@@ -1,31 +1,54 @@
 ﻿@page "/"
 @using Gtt.Chess.Engine
-<table>
-    <tbody>
-        @foreach (var r in this.Game.CurrentBoard().Cells.GroupBy(x => x.YAxis).OrderByDescending(x => x.Key))
+<div class="row">
+    <div class="col-10">
+        <table>
+            <tbody>
+            @foreach (var r in this.Game.CurrentBoard().Cells.GroupBy(x => x.YAxis).OrderByDescending(x => x.Key))
+            {
+                <tr>
+                    @foreach (var c in r.OrderBy(x => x.XAxis))
+                    {
+                        <td @onclick="() => SelectCell(c)" style="border: 1px solid #333; width: 90px; height: 90px; background-color: @CellColor(c.CellName, c.CellColor); text-align: center;">
+                            @{ var img = ImageUrl(c); }
+                            @if (img.Item1)
+                            {
+                                <img src="@img.Item2" alt="" style="width: 60px; background-color: @PieceBackground(c);" />
+                            }
+                        </td>
+                    }
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    <div class="col-2">
+        @if (ColorsInCheck.Any())
         {
-            <tr>
-                @foreach (var c in r.OrderBy(x => x.XAxis))
+            <h4>In Check</h4>
+            <div class="alert alert-warning">
+                @foreach (var c in ColorsInCheck)
                 {
-                    <td @onclick="() => SelectCell(c)" style="border: 1px solid #333; width: 90px; height: 90px; background-color: @CellColor(c.CellName, c.CellColor); text-align: center;">
-                        @{ var img = ImageUrl(c); }
-                        @if (img.Item1)
-                        {
-                            <img src="@img.Item2" alt="" style="width: 60px; background-color: @PieceBackground(c);" />
-                        }
-                    </td>
+                    <div>@c.ToString()</div>
                 }
-            </tr>
+            </div>
         }
-    </tbody>
-</table>
-
+        <h4>History</h4>
+        <ol>
+            @foreach (var h in Game.History())
+            {
+                <li>@h</li>
+            }
+        </ol>
+    </div>
+</div>
 @code{
 
     protected Game Game { get; set; }
     protected CellStatus FirstCellSelected { get; set; }
     protected CellStatus SecondCellSelected { get; set; }
     protected string[] PossibleMoves { get; set; } = new string[0];
+    protected string[] ColorsInCheck { get; set; } = new string[0];
 
     protected override Task OnInitializedAsync()
     {
@@ -58,10 +81,11 @@
         else
         {
             SecondCellSelected = cell;
-            Game.Move(FirstCellSelected.CellName, SecondCellSelected.CellName);
+            var result = Game.Move(FirstCellSelected.CellName, SecondCellSelected.CellName);
             FirstCellSelected = null;
             SecondCellSelected = null;
             PossibleMoves = new string[0];
+            ColorsInCheck = result.ColorsInCheck;
         }
 
         return Task.CompletedTask;
@@ -93,9 +117,17 @@
     {
         if (!string.IsNullOrWhiteSpace(c.PieceColor))
         {
-            if (FirstCellSelected == null && c.PieceColor == Game.CurrentBoard().Turn)
+            var turn = Game.CurrentBoard().Turn;
+            if (FirstCellSelected == null && c.PieceColor == turn)
             {
-                return "#fff7dc";
+                if (ColorsInCheck.Contains(turn))
+                {
+                    return "#ffcccb";
+                }
+                else
+                {
+                    return "#fff7dc";
+                }
             }
         }
         return "transparent";

@@ -47,7 +47,20 @@ namespace Gtt.Chess.Engine
 
         public bool IsLegalMoveTo(Cell cell)
         {
-            return IsOnTheBoard && PossibleMoves().Contains(cell);
+            var basicCheck = IsOnTheBoard && PossibleMoves().Contains(cell);
+            if (!basicCheck)
+            {
+                return false;
+            }
+
+            if (!Board.ReplayMode)
+            {
+                var simulatedWithMove = new Game(GameStyle.Traditional, Board.History, CurrentCell.Name, cell.Name);
+                var colorsInCheck = simulatedWithMove.Board.WhatColorIsInCheck();
+                return !colorsInCheck.Contains(CurrentCell.CurrentPiece.Color);
+            }
+
+            return true;
         }
 
 
@@ -60,9 +73,10 @@ namespace Gtt.Chess.Engine
         public IEnumerable<Piece> ThreatenedBy()
         {
             var canTake = Board.Cells
+                             .Where(x => x.CurrentPiece != null)
                              .Where(x => x.HasOpposingPiece(this))
                              .Select(x => x.CurrentPiece)
-                             .Where(x => x.PossibleMoves().Contains(CurrentCell));
+                             .Where(x => x.PossibleMoves().Contains(CurrentCell)).ToList();
 
             return canTake;
         }

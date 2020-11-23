@@ -15,7 +15,17 @@ namespace Gtt.Chess.Engine
 
         internal Board Board { get; }
 
-        public Game(GameStyle style)
+        public Game(GameStyle style) : this(style, new string[0])
+        {
+
+        }
+
+        public Game(GameStyle style, string[] history) : this(style, history, "", "")
+        {
+
+        }
+
+        internal Game(GameStyle style, string[] history, string nextFrom, string nextTo)
         {
             Style = style;
             Board = new Board();
@@ -64,11 +74,21 @@ namespace Gtt.Chess.Engine
                 default:
                     throw new ArgumentOutOfRangeException(nameof(style));
             }
+
+            if (history != null && history.Length > 0 ||(!string.IsNullOrWhiteSpace(nextFrom) && !string.IsNullOrWhiteSpace(nextTo)))
+            {
+                Board.ReplayHistory(history, nextFrom, nextTo);
+            }
         }
 
         public void Start()
         {
             StartTime = DateTimeOffset.UtcNow;
+        }
+
+        public string[] History()
+        {
+            return Board.History;
         }
 
         public string[] GetPossibleMoves(string location)

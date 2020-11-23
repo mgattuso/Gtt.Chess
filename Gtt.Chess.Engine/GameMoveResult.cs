@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace Gtt.Chess.Engine
 {
@@ -8,11 +9,11 @@ namespace Gtt.Chess.Engine
         {
             PiecesMoved = piecesMoved;
             MoveDuration = duration;
-            ColorsInCheck = colorsInCheck;
-            ColorWon = colorWon;
+            ColorsInCheck = colorsInCheck.Select(x => x.ToString()).ToArray();
+            ColorWon = colorWon.ToString();
         }
-        public Color[] ColorsInCheck { get; }
-        public Color? ColorWon { get; }
+        public string[] ColorsInCheck { get; }
+        public string ColorWon { get; }
         internal PieceMoveResultStatus[] PiecesMoved { get; }
         public DateTimeOffset MoveDuration { get; }
     }
