@@ -314,11 +314,69 @@ namespace Gtt.Chess.Engine
             return Cells.Where(x => x.CurrentPiece != null).Select(x => x.CurrentPiece).OfType<T>();
         }
 
-        public Color[] WhatColorIsInCheck()
+        public IEnumerable<Piece> FindPiecesByColor(Color color)
+        {
+            return Cells.Where(x => x.CurrentPiece != null && x.Color ==color).Select(x => x.CurrentPiece);
+        }
+
+        public IEnumerable<Piece> FindPiecesByTypeAndColor<T>(Color color) where T : Piece
+        {
+            return Cells.Where(x => x.CurrentPiece != null && x.Color == color).Select(x => x.CurrentPiece).OfType<T>();
+        }
+
+        public Color? WhatColorIsInCheck()
         {
             var kings = FindPiecesByType<King>().ToList();
-            var threatened = kings.Where(x => x.ThreatenedBy().Any()).Select(x => x.Color).ToArray();
-            return threatened;
+            try
+            {
+                var threatened = kings.Where(x => x.ThreatenedBy().Any()).Select(x => x.Color).SingleOrDefault();
+                return threatened;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Both colors are in check which is an illegal move", ex);
+            }
+        }
+
+        internal bool IsCellCovered(Cell cell, Color byColor)
+        {
+            if (cell == null) throw new ArgumentNullException(nameof(cell));
+            var pieces = FindPiecesByColor(byColor);
+            foreach (var piece in pieces)
+            {
+                if (piece.IsLegalMoveTo(cell))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public Color? WhatColorIsIncheckMate()
+        {
+            var colorInCheck = WhatColorIsInCheck();
+            if (colorInCheck==null)
+            {
+                return null;
+            }
+
+            var color = colorInCheck.Value;
+
+            var getPiecesByColor = FindPiecesByColor(color);
+
+            // CAN ANYONE TAKE THE ATTACKER
+            Cell attacker = LastMove();
+
+            // CAN THE KING MOVE OUT OF CHECK
+
+            return null;
+        }
+
+        private Cell LastMove()
+        {
+            var cell = GetCell(History.Last());
+            return cell;
         }
 
         public string[] History => _history.ToArray();

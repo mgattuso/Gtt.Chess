@@ -56,8 +56,8 @@ namespace Gtt.Chess.Engine
             if (!Board.ReplayMode)
             {
                 var simulatedWithMove = new Game(GameStyle.Traditional, Board.History, CurrentCell.Name, cell.Name);
-                var colorsInCheck = simulatedWithMove.Board.WhatColorIsInCheck();
-                return !colorsInCheck.Contains(CurrentCell.CurrentPiece.Color);
+                var colorInCheck = simulatedWithMove.Board.WhatColorIsInCheck();
+                return colorInCheck != null;
             }
 
             return true;

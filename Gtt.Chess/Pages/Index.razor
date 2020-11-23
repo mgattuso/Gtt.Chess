@@ -23,14 +23,11 @@
         </table>
     </div>
     <div class="col-2">
-        @if (ColorsInCheck.Any())
+        @if (ColorInCheck != null)
         {
             <h4>In Check</h4>
             <div class="alert alert-warning">
-                @foreach (var c in ColorsInCheck)
-                {
-                    <div>@c.ToString()</div>
-                }
+                @ColorInCheck
             </div>
         }
         <h4>History</h4>
@@ -48,7 +45,7 @@
     protected CellStatus FirstCellSelected { get; set; }
     protected CellStatus SecondCellSelected { get; set; }
     protected string[] PossibleMoves { get; set; } = new string[0];
-    protected string[] ColorsInCheck { get; set; } = new string[0];
+    protected string ColorInCheck { get; set; } = "";
 
     protected override Task OnInitializedAsync()
     {
@@ -85,7 +82,7 @@
             FirstCellSelected = null;
             SecondCellSelected = null;
             PossibleMoves = new string[0];
-            ColorsInCheck = result.ColorsInCheck;
+            ColorInCheck = result.ColorInCheck;
         }
 
         return Task.CompletedTask;
@@ -120,7 +117,7 @@
             var turn = Game.CurrentBoard().Turn;
             if (FirstCellSelected == null && c.PieceColor == turn)
             {
-                if (ColorsInCheck.Contains(turn))
+                if (ColorInCheck != null && ColorInCheck == turn)
                 {
                     return "#ffcccb";
                 }
