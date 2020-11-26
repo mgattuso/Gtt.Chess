@@ -126,16 +126,16 @@ namespace Gtt.Chess.Engine
                 );
         }
 
-        public BoardStatus CurrentBoard()
-        {
+        //public BoardStatus CurrentBoard()
+        //{
 
-            var board = new BoardStatus(
-                Board.Cells.Select(c =>
-                new CellStatus(c.Name, c.X, c.Y, c.Color.ToString(), c.CurrentPiece?.Name, c.CurrentPiece?.Color.ToString())
-            ).ToArray(),
-                Board.CurrentTurn);
-            return board;
-        }
+        //    var board = new BoardStatus(
+        //        Board.Cells.Select(c =>
+        //        new CellStatus(c.Name, c.X, c.Y, c.Color, c.CurrentPiece?.Name, c.CurrentPiece?.Color)
+        //    ).ToArray(),
+        //        Board.CurrentTurn);
+        //    return board;
+        //}
     }
 
 

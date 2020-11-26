@@ -23,12 +23,6 @@ namespace Gtt.Chess.Engine
 
         public string Name => $"{File}{Rank}";
 
-        public bool HasOpposingPiece(Piece otherPiece)
-        {
-            if (CurrentPiece == null) return false;
-            return CurrentPiece.Color != otherPiece.Color;
-        }
-
         public override string ToString()
         {
             return Name;
@@ -52,5 +46,11 @@ namespace Gtt.Chess.Engine
         }
 
         public Color Color => (X + Y) % 2 == 1 ? Color.White : Color.Black;
+
+        public bool HasOpposingPiece(Piece otherPiece)
+        {
+            if (CurrentPiece == null) return false;
+            return CurrentPiece.Color != otherPiece.Color;
+        }
     }
 }

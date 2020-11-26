@@ -1,15 +1,16 @@
 ﻿@page "/"
 @using Gtt.Chess.Engine
+@using Gtt.Chess.Engine.Extensions
 <div class="row">
     <div class="col-10">
         <table>
             <tbody>
-            @foreach (var r in this.Game.CurrentBoard().Cells.GroupBy(x => x.YAxis).OrderByDescending(x => x.Key))
+            @foreach (var r in Game.Board.Cells.GroupBy(x => x.Y).OrderByDescending(x => x.Key))
             {
                 <tr>
-                    @foreach (var c in r.OrderBy(x => x.XAxis))
+                    @foreach (var c in r.OrderBy(x => x.X))
                     {
-                        <td @onclick="() => SelectCell(c)" style="border: 1px solid #333; width: 90px; height: 90px; background-color: @CellColor(c.CellName, c.CellColor); text-align: center;">
+                        <td @onclick="() => SelectCell(c)" style="border: 1px solid #333; width: 90px; height: 90px; background-color: @CellColor(c.Name, c.Color); text-align: center;">
                             @{ var img = ImageUrl(c); }
                             @if (img.Item1)
                             {
@@ -23,6 +24,9 @@
         </table>
     </div>
     <div class="col-2">
+        <h4>Turn</h4>
+        @Game.CurrentTurn
+
         @if (ColorInCheck != null)
         {
             <h4>In Check</h4>
@@ -32,7 +36,7 @@
         }
         <h4>History</h4>
         <ol>
-            @foreach (var h in Game.History())
+            @foreach (var h in Game.MoveHistory.Select(x => $"{x.FromCell.Name}>{x.MoveDetails.ToCell.Name}"))
             {
                 <li>@h</li>
             }
@@ -41,81 +45,84 @@
 </div>
 @code{
 
-    protected Game Game { get; set; }
-    protected CellStatus FirstCellSelected { get; set; }
-    protected CellStatus SecondCellSelected { get; set; }
+    protected Game2 Game { get; set; }
+    protected Cell2 FirstCellSelected { get; set; }
+    protected Cell2 SecondCellSelected { get; set; }
     protected string[] PossibleMoves { get; set; } = new string[0];
-    protected string ColorInCheck { get; set; } = "";
+    protected Color? ColorInCheck { get; set; }
 
     protected override Task OnInitializedAsync()
     {
-        Game = new Game(GameStyle.Traditional);
+        Game = new Game2(GameStyle.Traditional);
         return base.OnInitializedAsync();
     }
 
-    protected Task SelectCell(CellStatus cell)
+    protected Task SelectCell(Cell2 cell)
     {
+        Console.WriteLine($"Clicked {cell.Name}");
         if (FirstCellSelected == null)
         {
-            if (!string.IsNullOrWhiteSpace(cell.PieceColor) && Game.CurrentBoard().Turn != cell.PieceColor)
+            if (cell.IsOccupied() && Game.CurrentTurn != cell.Occupant.Color)
             {
+                Console.WriteLine($"Cannot select {cell.Name} not this colors turn");
                 return Task.CompletedTask;
             }
 
+            Console.WriteLine($"Selecting {cell.Name} and getting moves");
             FirstCellSelected = cell;
-            PossibleMoves = Game.GetPossibleMoves(cell.CellName);
+            PossibleMoves = Game.GetPossibleMoves(cell.Name);
         }
-        else if (FirstCellSelected == cell)
+        else if (Equals(FirstCellSelected, cell))
         {
+            Console.WriteLine($"Unselecting {cell.Name}");
             FirstCellSelected = null;
             PossibleMoves = new string[0];
         }
-        else if (FirstCellSelected != null && cell.PieceColor == FirstCellSelected.PieceColor)
+        else if (FirstCellSelected != null && cell.Occupant?.Color == FirstCellSelected.Occupant.Color)
         {
+            Console.WriteLine($"Shifting to {cell.Name} and getting moves");
             FirstCellSelected = cell;
-            PossibleMoves = Game.GetPossibleMoves(cell.CellName);
+            PossibleMoves = Game.GetPossibleMoves(cell.Name);
         }
         else
         {
             SecondCellSelected = cell;
-            var result = Game.Move(FirstCellSelected.CellName, SecondCellSelected.CellName);
+            Console.WriteLine($"Performing move {FirstCellSelected.Name}{SecondCellSelected.Name}");
+            var result = Game.Move(FirstCellSelected.Name, SecondCellSelected.Name);
             FirstCellSelected = null;
             SecondCellSelected = null;
             PossibleMoves = new string[0];
-            ColorInCheck = result.ColorInCheck;
+            ColorInCheck = result.MoveDetails?.IsCheck??false ? result.Piece.Color.GetOtherColor() : (Color?)null;
         }
 
         return Task.CompletedTask;
     }
 
-    protected string CellColor(string name, string color)
+    protected string CellColor(string name, Color color)
     {
         if (PossibleMoves.Contains(name))
         {
             return "#fff7dc";
         }
 
-        if (FirstCellSelected?.CellName == name)
+        if (FirstCellSelected?.Name == name)
         {
             return "yellow";
         }
 
-        if (color.Equals("White", StringComparison.InvariantCultureIgnoreCase))
+        if (color == Color.White)
         {
             return "#eee";
         }
-        else
-        {
-            return "#666";
-        }
+        return "#666";
     }
 
-    protected string PieceBackground(CellStatus c)
+    protected string PieceBackground(Cell2 c)
     {
-        if (!string.IsNullOrWhiteSpace(c.PieceColor))
+        if (c.IsOccupied())
         {
-            var turn = Game.CurrentBoard().Turn;
-            if (FirstCellSelected == null && c.PieceColor == turn)
+            var turn = Game.CurrentTurn;
+            if (FirstCellSelected == null && c.Occupant.Color == turn)
             {
                 if (ColorInCheck != null && ColorInCheck == turn)
                 {
@@ -130,16 +137,18 @@
         return "transparent";
     }
 
-    protected Tuple<bool, string> ImageUrl(CellStatus cell)
+    protected Tuple<bool, string> ImageUrl(Cell2 cell)
     {
-        if (string.IsNullOrWhiteSpace(cell.PieceName))
+        if (!cell.IsOccupied())
         {
             return Tuple.Create(false, "");
         }
 
-        string color = cell.PieceColor.Equals("white", StringComparison.CurrentCultureIgnoreCase) ? "w" : "b";
+        string color = cell.Occupant.Color == Color.White ? "w" : "b";
+        string name = cell.Occupant.Name.ToLowerInvariant();
+        name = name.Replace("2", "");
 
-        return Tuple.Create(true, $@"\images\pieces\{color}_{cell.PieceName.ToLowerInvariant()}_2x_ns.png");
+        return Tuple.Create(true, $@"\images\pieces\{color}_{name}_2x_ns.png");
     }
 
 }

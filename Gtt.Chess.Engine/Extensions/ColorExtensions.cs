@@ -18,5 +18,10 @@ namespace Gtt.Chess.Engine.Extensions
                     throw new ArgumentOutOfRangeException(nameof(color), color, null);
             }
         }
+
+        public static string ToReference(this Color color)
+        {
+            return color.ToString().Substring(0, 1);
+        }
     }
 }
