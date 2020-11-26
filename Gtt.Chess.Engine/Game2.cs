@@ -162,7 +162,7 @@ namespace Gtt.Chess.Engine
 
             if (piece.IsLegalMoveTo(toCell))
             {
-                piece.MoveTo(toCell);
+                var outcome = piece.MoveTo(toCell);
             }
             else
             {

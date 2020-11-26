@@ -60,6 +60,13 @@
     protected Task SelectCell(Cell2 cell)
     {
         Console.WriteLine($"Clicked {cell.Name}");
+
+        if (FirstCellSelected == null && !cell.IsOccupied())
+        {
+            Console.WriteLine($"No piece found in {cell.Name}");
+            return Task.CompletedTask;
+        }
+
         if (FirstCellSelected == null)
         {
             if (cell.IsOccupied() && Game.CurrentTurn != cell.Occupant.Color)
