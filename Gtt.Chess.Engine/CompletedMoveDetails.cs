@@ -5,7 +5,7 @@ namespace Gtt.Chess.Engine
 {
     public class CompletedMoveDetails
     {
-        public CompletedMoveDetails(int serialNumber, TimeSpan timeToMove, Cell2 toCell, bool isCheck, bool isCheckMate, IEnumerable<Move2> associatedMoves)
+        public CompletedMoveDetails(int serialNumber, TimeSpan timeToMove, Cell toCell, bool isCheck, bool isCheckMate, IEnumerable<Move> associatedMoves)
         {
             SerialNumber = serialNumber;
             TimeToMove = timeToMove;
@@ -17,8 +17,8 @@ namespace Gtt.Chess.Engine
 
         public TimeSpan TimeToMove { get; }
         public int SerialNumber { get; }
-        public Cell2 ToCell { get; }
-        public IEnumerable<Move2> AssociatedMoves { get; }
+        public Cell ToCell { get; }
+        public IEnumerable<Move> AssociatedMoves { get; }
         public bool IsCheckMate { get; }
         public bool IsCheck { get; }
     }

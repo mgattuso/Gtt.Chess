@@ -3,45 +3,44 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Gtt.Chess.Engine.Extensions;
-using Gtt.Chess.Engine.Pieces;
 
 namespace Gtt.Chess.Engine
 {
-    public class Board2
+    public class Board
     {
-        public Game2 Game { get; }
+        public Game Game { get; }
         public const int MaxX = 8;
         public const int MaxY = 8;
 
-        public Board2(Game2 game)
+        public Board(Game game)
         {
             Game = game;
             Cells = CreateCells();
         }
 
-        private List<Cell2> CreateCells()
+        private List<Cell> CreateCells()
         {
-            var l = new List<Cell2>();
+            var l = new List<Cell>();
             for (int y = 1; y <= MaxY; y++)
                 for (int x = 1; x <= MaxX; x++)
-                    l.Add(new Cell2(this, x, y, l.Count+1));
+                    l.Add(new Cell(this, x, y, l.Count+1));
             return l;
         }
 
-        public IEnumerable<Cell2> Cells { get; }
+        public IEnumerable<Cell> Cells { get; }
 
-        public void AddPiece(Piece2 piece, string location)
+        public void AddPiece(Piece piece, string location)
         {
-            Cell2 cell = GetCell(location);
+            Cell cell = GetCell(location);
             piece.PlaceOnBoard(cell);
         }
 
-        public Cell2 GetCell(string location)
+        public Cell GetCell(string location)
         {
             return Cells.SingleOrDefault(c => c.Name == location);
         }
 
-        public Cell2 GetCell(int x, int y)
+        public Cell GetCell(int x, int y)
         {
             return Cells.SingleOrDefault(c => c.X == x && c.Y == y);
         }
@@ -51,24 +50,24 @@ namespace Gtt.Chess.Engine
             return Cells.Select(x => x.Reference).ToArray();
         }
 
-        public void RemovePiece(Piece2 piece)
+        public void RemovePiece(Piece piece)
         {
             if (piece == null) throw new ArgumentNullException(nameof(piece));
             Game.Captures[piece.Color.GetOtherColor()].Add(piece);
         }
 
-        public IEnumerable<Cell2> GetAllCellsInRank(Cell2 startingCell)
+        public IEnumerable<Cell> GetAllCellsInRank(Cell startingCell)
         {
             return Cells.Where(x => x.Rank == startingCell.Rank);
         }
 
-        public IEnumerable<Cell2> GetAvailableCellsInRank(Cell2 startingCell, int? maxRight = null, int? maxLeft = null, bool cannotTakeCell = false)
+        public IEnumerable<Cell> GetAvailableCellsInRank(Cell startingCell, int? maxRight = null, int? maxLeft = null, bool cannotTakeCell = false)
         {
             if (maxRight != null && maxRight < 0 || maxRight > MaxY) throw new ArgumentException(nameof(maxRight), $"Must be between 0 and {MaxY}");
             if (maxLeft != null && maxLeft < 0 || maxLeft > MaxY) throw new ArgumentException(nameof(maxLeft), $"Must be between 0 and {MaxY}");
 
-            List<Cell2> results = new List<Cell2>();
-            List<Cell2> availableCells = GetAllCellsInRank(startingCell).ToList();
+            List<Cell> results = new List<Cell>();
+            List<Cell> availableCells = GetAllCellsInRank(startingCell).ToList();
 
             // Right
             for (int i = 1; i <= (maxRight ?? MaxX); i++)
@@ -91,18 +90,18 @@ namespace Gtt.Chess.Engine
             return results;
         }
 
-        public IEnumerable<Cell2> GetAllCellsInFile(Cell2 startingCell)
+        public IEnumerable<Cell> GetAllCellsInFile(Cell startingCell)
         {
             return Cells.Where(x => x.File == startingCell.File);
         }
 
-        public IEnumerable<Cell2> GetAvailableCellsInFile(Cell2 startingCell, int? maxForward = null, int? maxBackwards = null, bool cannotTakeCell = false)
+        public IEnumerable<Cell> GetAvailableCellsInFile(Cell startingCell, int? maxForward = null, int? maxBackwards = null, bool cannotTakeCell = false)
         {
             if (maxForward != null && maxForward < 0 || maxForward > MaxY) throw new ArgumentException(nameof(maxForward), $"Must be between 0 and {MaxY}");
             if (maxBackwards != null && maxBackwards < 0 || maxBackwards > MaxY) throw new ArgumentException(nameof(maxBackwards), $"Must be between 0 and {MaxY}");
 
-            List<Cell2> results = new List<Cell2>();
-            List<Cell2> availableCells = GetAllCellsInFile(startingCell).ToList();
+            List<Cell> results = new List<Cell>();
+            List<Cell> availableCells = GetAllCellsInFile(startingCell).ToList();
 
             int side = startingCell.Occupant?.Color == Color.Black ? -1 : 1;
 
@@ -126,20 +125,20 @@ namespace Gtt.Chess.Engine
             return results;
         }
 
-        public IEnumerable<Cell2> AllRankAndFileCells(Cell2 startingCell)
+        public IEnumerable<Cell> AllRankAndFileCells(Cell startingCell)
         {
             return GetAllCellsInRank(startingCell).Union(GetAllCellsInFile(startingCell));
         }
 
-        public IEnumerable<Cell2> AllAvailableRankAndFileCells(Cell2 startingCell, int? maxRight = null, int? maxLeft = null, int? maxForward = null, int? maxBackwards = null, bool cannotTakeCell = false)
+        public IEnumerable<Cell> AllAvailableRankAndFileCells(Cell startingCell, int? maxRight = null, int? maxLeft = null, int? maxForward = null, int? maxBackwards = null, bool cannotTakeCell = false)
         {
             return GetAvailableCellsInRank(startingCell, maxRight, maxLeft, cannotTakeCell)
                 .Union(GetAvailableCellsInFile(startingCell, maxForward, maxBackwards, cannotTakeCell));
         }
 
-        public IEnumerable<Cell2> GetAllCellsOnPositiveDiagonal(Cell2 startingCell)
+        public IEnumerable<Cell> GetAllCellsOnPositiveDiagonal(Cell startingCell)
         {
-            List<Cell2> results = new List<Cell2>();
+            List<Cell> results = new List<Cell>();
             int[] start = { startingCell.X - MaxX, startingCell.Y - MaxY };
             for (int i = 0; i < 16; i++)
             {
@@ -153,11 +152,11 @@ namespace Gtt.Chess.Engine
             return results;
         }
 
-        public IEnumerable<Cell2> GetAvailableCellsOnPositiveDiagonal(Cell2 startingCell, int? maxForwardRight = null, int? maxBackLeft = null, bool cannotTakeCell = false)
+        public IEnumerable<Cell> GetAvailableCellsOnPositiveDiagonal(Cell startingCell, int? maxForwardRight = null, int? maxBackLeft = null, bool cannotTakeCell = false)
         {
-            List<Cell2> results = new List<Cell2>();
+            List<Cell> results = new List<Cell>();
             int side = startingCell.Occupant?.Color == Color.Black ? -1 : 1;
-            List<Cell2> availableCells = GetAllCellsOnPositiveDiagonal(startingCell).ToList();
+            List<Cell> availableCells = GetAllCellsOnPositiveDiagonal(startingCell).ToList();
 
             // positive X
             for (int i = 1; i <= (maxForwardRight ?? MaxX); i++)
@@ -180,9 +179,9 @@ namespace Gtt.Chess.Engine
             return results;
         }
 
-        public IEnumerable<Cell2> GetAllCellsOnNegativeDiagonal(Cell2 startingCell)
+        public IEnumerable<Cell> GetAllCellsOnNegativeDiagonal(Cell startingCell)
         {
-            List<Cell2> results = new List<Cell2>();
+            List<Cell> results = new List<Cell>();
             int[] start = { startingCell.X + MaxX, startingCell.Y - MaxY };
             for (int i = 0; i < 16; i++)
             {
@@ -196,10 +195,10 @@ namespace Gtt.Chess.Engine
             return results;
         }
 
-        public IEnumerable<Cell2> GetAvailableCellsOnNegativeDiagonal(Cell2 startingCell, int? maxForwardLeft = null, int? maxBackRight = null, bool cannotTakeCell = false)
+        public IEnumerable<Cell> GetAvailableCellsOnNegativeDiagonal(Cell startingCell, int? maxForwardLeft = null, int? maxBackRight = null, bool cannotTakeCell = false)
         {
-            List<Cell2> results = new List<Cell2>();
-            List<Cell2> availableCells = GetAllCellsOnNegativeDiagonal(startingCell).ToList();
+            List<Cell> results = new List<Cell>();
+            List<Cell> availableCells = GetAllCellsOnNegativeDiagonal(startingCell).ToList();
             int side = startingCell.Occupant?.Color == Color.Black ? -1 : 1;
 
             // positive X
@@ -222,12 +221,12 @@ namespace Gtt.Chess.Engine
             return results;
         }
 
-        public IEnumerable<Cell2> GetAllDiagonalCells(Cell2 startingCell)
+        public IEnumerable<Cell> GetAllDiagonalCells(Cell startingCell)
         {
             return GetAllCellsOnPositiveDiagonal(startingCell).Union(GetAllCellsOnNegativeDiagonal(startingCell));
         }
 
-        public IEnumerable<Cell2> GetAllAvailableDiagonalCells(Cell2 startingCell,
+        public IEnumerable<Cell> GetAllAvailableDiagonalCells(Cell startingCell,
             int? maxForwardRight = null, int? maxBackLeft = null, int? maxForwardLeft = null, int? maxBackRight = null, bool cannotTakeCell = false)
         {
             return GetAvailableCellsOnPositiveDiagonal(startingCell, maxForwardRight, maxBackLeft, cannotTakeCell)
@@ -235,11 +234,11 @@ namespace Gtt.Chess.Engine
         }
 
 
-        private Tuple<Cell2, bool> AnalyzeCellAndStop(Cell2 currentCell, Cell2 next, bool cannotTakeCell)
+        private Tuple<Cell, bool> AnalyzeCellAndStop(Cell currentCell, Cell next, bool cannotTakeCell)
         {
-            if (Equals(currentCell, next)) return Tuple.Create((Cell2)null, false);
+            if (Equals(currentCell, next)) return Tuple.Create((Cell)null, false);
             var currentPiece = currentCell.Occupant;
-            if (next == null) return Tuple.Create((Cell2)null, true);
+            if (next == null) return Tuple.Create((Cell)null, true);
 
             var targetPiece = next.Occupant;
             if (targetPiece == null)
@@ -257,10 +256,10 @@ namespace Gtt.Chess.Engine
                 return Tuple.Create(next, true);
             }
 
-            return Tuple.Create((Cell2)null, true);
+            return Tuple.Create((Cell)null, true);
         }
 
-        public Cell2 GetRelativeCell(Cell2 startingCell, int x, int y)
+        public Cell GetRelativeCell(Cell startingCell, int x, int y)
         {
             return Cells.Move(startingCell, x, y);
         }

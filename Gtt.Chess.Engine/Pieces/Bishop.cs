@@ -2,16 +2,16 @@
 
 namespace Gtt.Chess.Engine.Pieces
 {
-    public class Bishop2 : Piece2
+    public class Bishop : Piece
     {
-        public Bishop2(Color color, bool hasMoved) : base(color, "B", hasMoved)
+        public Bishop(Color color, bool hasMoved) : base(color, "B", hasMoved)
         {
         }
 
-        public override IEnumerable<Cell2> PossibleMoves()
+        public override IEnumerable<Cell> PossibleMoves()
         {
             // CAN MOVE DIAGONALLY
-            List<Cell2> results = new List<Cell2>();
+            List<Cell> results = new List<Cell>();
             var diagonals = CurrentCell.Board.GetAllAvailableDiagonalCells(CurrentCell);
             results.AddRange(diagonals);
             return results;

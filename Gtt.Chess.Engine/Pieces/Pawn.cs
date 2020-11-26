@@ -4,16 +4,16 @@ using System.Text;
 
 namespace Gtt.Chess.Engine.Pieces
 {
-    public class Pawn2 : Piece2
+    public class Pawn : Piece
     {
-        public Pawn2(Color color, bool hasMoved) : base(color, "P", hasMoved)
+        public Pawn(Color color, bool hasMoved) : base(color, "P", hasMoved)
         {
         }
 
-        public override IEnumerable<Cell2> PossibleMoves()
+        public override IEnumerable<Cell> PossibleMoves()
         {
             // RULE #1: PAWN CAN MOVE 2 SQUARES ON FIRST MOVE
-            List<Cell2> legalCells = new List<Cell2>();
+            List<Cell> legalCells = new List<Cell>();
             int maxForward = HasMoved ? 1 : 2;
             var cells = CurrentCell.Board.GetAvailableCellsInFile(CurrentCell, maxForward, 0, cannotTakeCell: true);
             legalCells.AddRange(cells);

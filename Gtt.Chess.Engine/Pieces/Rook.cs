@@ -2,13 +2,13 @@
 
 namespace Gtt.Chess.Engine.Pieces
 {
-    public class Rook2 : Piece2
+    public class Rook : Piece
     {
-        public Rook2(Color color, bool hasMoved) : base(color, "R", hasMoved)
+        public Rook(Color color, bool hasMoved) : base(color, "R", hasMoved)
         {
         }
 
-        public override IEnumerable<Cell2> PossibleMoves()
+        public override IEnumerable<Cell> PossibleMoves()
         {
             var rankFile = CurrentCell.Board.AllAvailableRankAndFileCells(CurrentCell);
             return rankFile;

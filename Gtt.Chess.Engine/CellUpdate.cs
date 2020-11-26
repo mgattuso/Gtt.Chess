@@ -2,17 +2,17 @@
 {
     public class CellUpdate
     {
-        public Cell2 Cell { get; }
-        public Piece2 IncomingPiece { get; }
-        public Piece2 DepartingPiece { get; }
+        public Cell Cell { get; }
+        public Piece IncomingPiece { get; }
+        public Piece DepartingPiece { get; }
 
-        public CellUpdate(Cell2 cell, Piece2 incomingPiece)
+        public CellUpdate(Cell cell, Piece incomingPiece)
         {
             Cell = cell;
             IncomingPiece = incomingPiece;
         }
 
-        public CellUpdate(Cell2 cell, Piece2 incomingPiece, Piece2 departingPiece)
+        public CellUpdate(Cell cell, Piece incomingPiece, Piece departingPiece)
         {
             Cell = cell;
             IncomingPiece = incomingPiece;

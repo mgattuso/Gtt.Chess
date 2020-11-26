@@ -2,13 +2,13 @@
 
 namespace Gtt.Chess.Engine.Pieces
 {
-    public class Knight2 : Piece2
+    public class Knight : Piece
     {
-        public Knight2(Color color, bool hasMoved) : base(color, "N", hasMoved)
+        public Knight(Color color, bool hasMoved) : base(color, "N", hasMoved)
         {
         }
 
-        public override IEnumerable<Cell2> PossibleMoves()
+        public override IEnumerable<Cell> PossibleMoves()
         {
             int[][] positions = {
                 new[] {1, 2},

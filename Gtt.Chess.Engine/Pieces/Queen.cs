@@ -3,13 +3,13 @@ using System.Linq;
 
 namespace Gtt.Chess.Engine.Pieces
 {
-    public class Queen2 : Piece2
+    public class Queen : Piece
     {
-        public Queen2(Color color, bool hasMoved) : base(color, "Q", hasMoved)
+        public Queen(Color color, bool hasMoved) : base(color, "Q", hasMoved)
         {
         }
 
-        public override IEnumerable<Cell2> PossibleMoves()
+        public override IEnumerable<Cell> PossibleMoves()
         {
             var straight = CurrentCell.Board.AllAvailableRankAndFileCells(CurrentCell);
             var diagonal = CurrentCell.Board.GetAllAvailableDiagonalCells(CurrentCell);

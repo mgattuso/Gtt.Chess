@@ -45,19 +45,19 @@
 </div>
 @code{
 
-    protected Game2 Game { get; set; }
-    protected Cell2 FirstCellSelected { get; set; }
-    protected Cell2 SecondCellSelected { get; set; }
+    protected Game Game { get; set; }
+    protected Cell FirstCellSelected { get; set; }
+    protected Cell SecondCellSelected { get; set; }
     protected string[] PossibleMoves { get; set; } = new string[0];
     protected Color? ColorInCheck { get; set; }
 
     protected override Task OnInitializedAsync()
     {
-        Game = new Game2(GameStyle.Traditional);
+        Game = new Game(GameStyle.Traditional);
         return base.OnInitializedAsync();
     }
 
-    protected Task SelectCell(Cell2 cell)
+    protected Task SelectCell(Cell cell)
     {
         Console.WriteLine($"Clicked {cell.Name}");
 
@@ -124,7 +124,7 @@
         return "#666";
     }
 
-    protected string PieceBackground(Cell2 c)
+    protected string PieceBackground(Cell c)
     {
         if (c.IsOccupied())
         {
@@ -144,7 +144,7 @@
         return "transparent";
     }
 
-    protected Tuple<bool, string> ImageUrl(Cell2 cell)
+    protected Tuple<bool, string> ImageUrl(Cell cell)
     {
         if (!cell.IsOccupied())
         {

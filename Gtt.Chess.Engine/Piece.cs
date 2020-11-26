@@ -5,23 +5,23 @@ using Gtt.Chess.Engine.Extensions;
 
 namespace Gtt.Chess.Engine
 {
-    public abstract class Piece2
+    public abstract class Piece
     {
-        protected Piece2(Color color, string code, bool hasMoved)
+        protected Piece(Color color, string code, bool hasMoved)
         {
             Color = color;
             Code = code;
             HasMoved = hasMoved;
         }
 
-        public void PlaceOnBoard(Cell2 cell)
+        public void PlaceOnBoard(Cell cell)
         {
             StartingCell = cell;
             CurrentCell = cell;
             cell.SetPiece(this);
         }
 
-        public CellUpdate MoveTo(Cell2 cell)
+        public CellUpdate MoveTo(Cell cell)
         {
             var currentCell = this.CurrentCell;
             var r = cell.SetPiece(this);
@@ -33,9 +33,9 @@ namespace Gtt.Chess.Engine
 
         public bool HasMoved { get; protected set; }
 
-        public Cell2 StartingCell { get; protected set; }
+        public Cell StartingCell { get; protected set; }
 
-        public Cell2 CurrentCell { get; protected set; }
+        public Cell CurrentCell { get; protected set; }
         public bool IsOnTheBoard => CurrentCell != null;
         public Color Color { get; }
         public string Name => GetType().Name;
@@ -50,12 +50,12 @@ namespace Gtt.Chess.Engine
             }
         }
 
-        public bool IsLegalMoveTo(Cell2 cell)
+        public bool IsLegalMoveTo(Cell cell)
         {
             if (cell == null) throw new ArgumentNullException(nameof(cell));
             return PossibleMoves().Contains(cell);
         }
 
-        public abstract IEnumerable<Cell2> PossibleMoves();
+        public abstract IEnumerable<Cell> PossibleMoves();
     }
 }

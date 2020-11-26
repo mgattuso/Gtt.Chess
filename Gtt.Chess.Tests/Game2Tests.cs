@@ -13,7 +13,7 @@ namespace Gtt.Chess.Tests
         [TestMethod]
         public void BoardReferenceDefault()
         {
-            var g = new Game2(GameStyle.Traditional);
+            var g = new Game(GameStyle.Traditional);
             g.Move("A2", "A4");
             g.Move("B7", "B5");
             g.Move("A4", "B5");
@@ -35,7 +35,7 @@ namespace Gtt.Chess.Tests
         [TestMethod]
         public void PossibleMoves()
         {
-            var g = new Game2(GameStyle.Traditional);
+            var g = new Game(GameStyle.Traditional);
             var moves = g.GetPossibleMoves("A2");
             Console.WriteLine(string.Join(", ", moves));
         }
@@ -43,7 +43,7 @@ namespace Gtt.Chess.Tests
         [TestMethod]
         public void CanCloneGame()
         {
-            var g = new Game2(GameStyle.Traditional);
+            var g = new Game(GameStyle.Traditional);
             var clone = g.Clone();
             var s = string.Join(", ", g.Board.SerializeBoardPositions());
             var c = string.Join(", ", clone.Board.SerializeBoardPositions());

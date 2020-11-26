@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace Gtt.Chess.Engine
 {
-    public class Move2
+    public class Move
     {
-        protected Move2(Piece2 piece, Cell2 fromCell, string message)
+        protected Move(Piece piece, Cell fromCell, string message)
         {
             Piece = piece;
             FromCell = fromCell;
@@ -14,44 +14,44 @@ namespace Gtt.Chess.Engine
             MoveRecorded = DateTimeOffset.UtcNow;
         }
 
-        protected Move2(
-            Piece2 piece,
-            Cell2 fromCell,
-            Cell2 toCell,
+        protected Move(
+            Piece piece,
+            Cell fromCell,
+            Cell toCell,
             int serialNumber,
             TimeSpan timeToMove,
             bool isCheck,
             bool isCheckMate,
-            IEnumerable<Move2> associatedMoves) : this(piece, fromCell, "")
+            IEnumerable<Move> associatedMoves) : this(piece, fromCell, "")
         {
             MoveDetails = new CompletedMoveDetails(serialNumber, timeToMove, toCell, isCheck, isCheckMate, associatedMoves);
             ValidMove = true;
         }
 
         public bool ValidMove { get; }
-        public Piece2 Piece { get; }
-        public Cell2 FromCell { get; }
+        public Piece Piece { get; }
+        public Cell FromCell { get; }
         public string Message { get; }
 
         public DateTimeOffset MoveRecorded { get; }
 
         public CompletedMoveDetails MoveDetails { get; protected set; }
 
-        public static Move2 InvalidPlay(Piece2 piece, Cell2 fromCell, string message)
+        public static Move InvalidPlay(Piece piece, Cell fromCell, string message)
         {
-            return new Move2(piece, fromCell, message);
+            return new Move(piece, fromCell, message);
         }
-        public static Move2 ValidPlay(
-            Piece2 piece,
-            Cell2 fromCell,
-            Cell2 toCell,
+        public static Move ValidPlay(
+            Piece piece,
+            Cell fromCell,
+            Cell toCell,
             int serialNumber,
             TimeSpan duration,
             bool isCheck,
             bool isCheckMate,
-            IEnumerable<Move2> associatedMoves)
+            IEnumerable<Move> associatedMoves)
         {
-            return new Move2(piece, fromCell, toCell, serialNumber, duration, isCheck, isCheckMate, associatedMoves);
+            return new Move(piece, fromCell, toCell, serialNumber, duration, isCheck, isCheckMate, associatedMoves);
         }
     }
 }
