@@ -160,8 +160,29 @@ namespace Gtt.Chess.Engine
                 }
             }
 
+            bool isCheck = false;
+            bool isCheckMate = false;
+
             if (piece.IsLegalMoveTo(toCell))
             {
+                var simulatedMove = SimulateMove(from, to);
+                var inCheck = simulatedMove.PiecesInCheck();
+                if (inCheck.Any(x => x.Color == CurrentTurn))
+                {
+                    return Engine.Move.InvalidPlay(piece, fromCell, $"Cannot make this move. This move would put ${piece.Color} in check.");
+                }
+
+                if (inCheck.Any())
+                {
+                    isCheck = true;
+                    var inCheckMate = simulatedMove.PiecesInCheckMate();
+                    if (inCheckMate.Any(x => x.Color == CurrentTurn))
+                    {
+                        return Engine.Move.InvalidPlay(piece, fromCell, $"Cannot make this move. This move would put ${piece.Color} in checkmate.");
+                    }
+                    isCheckMate = true;
+                }
+
                 var outcome = piece.MoveTo(toCell);
             }
             else
@@ -170,8 +191,6 @@ namespace Gtt.Chess.Engine
             }
 
             var associatedMoves = new List<Move>();// POPULATE ON CASTLING
-            bool isCheck = false;
-            bool isCheckMate = false;
 
             //TODO: IMPLEMENT LOGIC
             CurrentTurn = CurrentTurn.GetOtherColor();
@@ -181,11 +200,71 @@ namespace Gtt.Chess.Engine
             return move;
         }
 
+        private King[] PiecesInCheck()
+        {
+            var kings = Board.GetPieces<King>();
+            King[] r = kings.Where(x => x.CanBeTakenBy().Any()).ToArray();
+            return r;
+        }
+
+        private King[] PiecesInCheckMate()
+        {
+            var kings = Board.GetPieces<King>().ToList();
+            Dictionary<Color, bool> canBeTaken = new Dictionary<Color, bool>
+            {
+                {Color.White, false},
+                {Color.Black, false}
+            };
+
+            // CAN THE ATTACKER BE REMOVED
+            
+
+            foreach (var king in kings)
+            {
+                // CAN THE ATTACKER BE TAKEN
+                foreach (var piece in king.CanBeTakenBy())
+                {
+                    if (piece.CanBeTakenBy().Any())
+                    {
+                        canBeTaken[piece.Color] = true;
+                    }
+                }
+
+                // CAN THE KING MOVE OUT OF THE WAY
+                if (canBeTaken.Any(x => x.Value == false && x.Key == king.Color))
+                {
+                    foreach (var move in king.PossibleMoves())
+                    {
+                        var sim = SimulateMove(king.CurrentCell.Name, move.Name);
+                        if (sim.PiecesInCheck().Contains(king))
+                        {
+                            canBeTaken[king.Color] = true;
+                            break;
+                        }
+                    }
+                }
+
+                // CAN BE BLOCKED
+                //TODO:
+            }
+
+            return kings.Where(x => canBeTaken.Where(y => y.Value).Select(y => y.Key).Contains(x.Color)).ToArray();
+        }
+
         public Board Board { get; }
 
         public Game Clone()
         {
             return new Game(Style, Board, CurrentTurn);
+        }
+
+        public Game SimulateMove(string from, string to)
+        {
+            var g = Clone();
+            var fromCell = g.Board.GetCell(from);
+            var toCell = g.Board.GetCell(to);
+            fromCell.Occupant.MoveTo(toCell);
+            return g;
         }
 
         public string[] GetPossibleMoves(string location)

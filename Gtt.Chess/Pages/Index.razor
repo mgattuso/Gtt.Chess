@@ -34,6 +34,13 @@
                 @ColorInCheck
             </div>
         }
+        @if (ColorInCheckMate != null)
+        {
+            <h4>In Check</h4>
+            <div class="alert alert-warning">
+                @ColorInCheckMate
+            </div>
+        }
         <h4>History</h4>
         <ol>
             @foreach (var h in Game.MoveHistory.Select(x => $"{x.FromCell.Name}>{x.MoveDetails.ToCell.Name}"))
@@ -50,6 +57,7 @@
     protected Cell SecondCellSelected { get; set; }
     protected string[] PossibleMoves { get; set; } = new string[0];
     protected Color? ColorInCheck { get; set; }
+    protected Color? ColorInCheckMate { get; set; }
 
     protected override Task OnInitializedAsync()
     {
@@ -96,10 +104,14 @@
             SecondCellSelected = cell;
             Console.WriteLine($"Performing move {FirstCellSelected.Name}{SecondCellSelected.Name}");
             var result = Game.Move(FirstCellSelected.Name, SecondCellSelected.Name);
-            FirstCellSelected = null;
-            SecondCellSelected = null;
-            PossibleMoves = new string[0];
-            ColorInCheck = result.MoveDetails?.IsCheck??false ? result.Piece.Color.GetOtherColor() : (Color?)null;
+            if (result.ValidMove)
+            {
+                FirstCellSelected = null;
+                SecondCellSelected = null;
+                PossibleMoves = new string[0];
+                ColorInCheck = result.MoveDetails?.IsCheck ?? false ? result.Piece.Color.GetOtherColor() : (Color?) null;
+                ColorInCheckMate = result.MoveDetails?.IsCheckMate ?? false ? result.Piece.Color.GetOtherColor() : (Color?)null;
+            }
         }
 
         return Task.CompletedTask;

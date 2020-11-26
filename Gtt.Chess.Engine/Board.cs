@@ -263,5 +263,10 @@ namespace Gtt.Chess.Engine
         {
             return Cells.Move(startingCell, x, y);
         }
+
+        public IEnumerable<T> GetPieces<T>() where T : Piece
+        {
+            return Cells.Where(x => x.IsOccupied()).Select(x => x.Occupant).OfType<T>();
+        }
     }
 }

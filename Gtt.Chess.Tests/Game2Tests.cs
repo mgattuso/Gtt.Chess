@@ -41,6 +41,16 @@ namespace Gtt.Chess.Tests
         }
 
         [TestMethod]
+        public void TestCheck()
+        {
+            var g = new Game(GameStyle.Traditional);
+            g.Move("E2", "E3");
+            g.Move("F7", "F6");
+            var m = g.Move("D1", "H5");
+            Assert.IsTrue(m.ValidMove);
+        }
+
+        [TestMethod]
         public void CanCloneGame()
         {
             var g = new Game(GameStyle.Traditional);

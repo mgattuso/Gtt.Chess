@@ -45,7 +45,7 @@ namespace Gtt.Chess.Engine
         {
             get
             {
-                var code = !HasMoved ? Code.ToLowerInvariant() :  Code;
+                var code = !HasMoved ? Code.ToLowerInvariant() : Code;
                 return $"{Color.ToReference()}{code}";
             }
         }
@@ -54,6 +54,30 @@ namespace Gtt.Chess.Engine
         {
             if (cell == null) throw new ArgumentNullException(nameof(cell));
             return PossibleMoves().Contains(cell);
+        }
+
+        public Piece[] CanBeTakenBy()
+        {
+            if (!IsOnTheBoard)
+            {
+                return new Piece[0];
+            }
+
+            return CurrentCell.Board.Cells
+                .Where(c => c.IsOccupied() && c.HasOpposingPiece(this))
+                .Select(x => x.Occupant)
+                .Where(x => x.CanTake().Contains(this))
+                .ToArray();
+        }
+
+        public Piece[] CanTake()
+        {
+            if (!IsOnTheBoard)
+            {
+                return new Piece[0];
+            }
+            return PossibleMoves().Where(x => x.IsOccupied() && x.HasOpposingPiece(this))
+                .Select(x => x.Occupant).ToArray();
         }
 
         public abstract IEnumerable<Cell> PossibleMoves();
